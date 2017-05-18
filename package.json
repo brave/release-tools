@@ -1,0 +1,20 @@
+{
+  "name": "release-tools",
+  "version": "1.0.0",
+  "description": "Releases tools for browser-laptop",
+  "scripts": {},
+  "author": "Brave",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "async": "^2.4.0",
+    "aws-sdk": "^2.52.0",
+    "crypto": "0.0.3",
+    "glob": "^7.1.1",
+    "request": "^2.81.0",
+    "s3": "^4.4.0",
+    "semver": "^5.3.0",
+    "underscore": "^1.8.3",
+    "xmldoc": "^1.1.0",
+    "yargs": "^7.1.0"
+  }
+}
