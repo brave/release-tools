@@ -28,7 +28,7 @@ var AWS = require('aws-sdk')
 var channelData = require('../src/common').channelData
 
 var args = require('yargs')
-    .usage('node tools/uploader.js --source=/full/directory/to/browser-laptop --send')
+    .usage('node bin/uploadBrowser.js --source=/full/directory/to/browser-laptop --send')
     .demand(['channel', 'source'])
     .describe('channel', 'channel identifier { dev, beta, release }')
     .describe('source', 'directory containing release files in dist/ folder')
