@@ -44,6 +44,7 @@ const args = require('yargs')
 const googleUpdateServerBaseUrl = 'https://clients2.google.com/service/update2'
 const braveUpdateServerBaseUrl = 'https://laptop-updates.brave.com/extensions'
 const localUpdateServerBaseUrl = 'http://localhost:8192/extensions'
+const widevineComponentId = 'oimompecagnajdejgnnjijobebaeigek'
 
 const common = require('../src/common')
 
@@ -64,7 +65,7 @@ const readExtensions = () => JSON.parse(fs.readFileSync(extensionManifestPath))
 const readComponentsForVersionUpgradesOnly = () => [...readExtensions(),
   // This should always be served from Google servers for licensing reasons
   // and this is only used for purposes of reporting.  We don't actually serve this file.
-  ['oimompecagnajdejgnnjijobebaeigek', '1.4.8.903', '', 'Widevine']
+  [widevineComponentId, '1.4.8.903', '', 'Widevine']
 ]
 
 /**
@@ -146,7 +147,7 @@ const getSHA = (filePath) => {
 }
 
 const verifyFileSHA = (filePath, expectedSHA256) => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     getSHA(filePath).then((calculatedSHA256) => {
       if (calculatedSHA256 === expectedSHA256) {
         vlog(1, `Verified SHA for ${filePath}`)
@@ -215,7 +216,7 @@ if (args.id && args.path && args.version) {
     }
 
     vlog(2, 'Response body:', body)
-    const responseComponents = getResponseComponents(body)
+    let responseComponents = getResponseComponents(body)
       .filter(([componentId]) => !args.id || componentId === args.id)
     if (responseComponents.length === 0) {
       console.error('No component information returned')
@@ -232,6 +233,11 @@ if (args.id && args.path && args.version) {
       .filter((component) => component[1] !== component[4])
       // And reduce to a string that we print out
       .reduce((result, [componentId, chromeVersion, chromeSHA256, componentId2, braveVersion, braveSHA256, componentName]) => result + `Component: ${componentName} (${componentId})\nChrome store: ${chromeVersion}\nBrave store: ${braveVersion}\nSHA 256: ${chromeSHA256}\n\n`, ''))
+
+    // Widevine components should not be attempted to be downloaded or uploaded, it is just for getting the version.
+    // If you try it will just throw an error.
+    responseComponents = getResponseComponents(body)
+      .filter(([componentId]) => componentId !== widevineComponentId)
 
     if (args.download || args.upload) {
       mkdir('out')
