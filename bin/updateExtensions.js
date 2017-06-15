@@ -7,17 +7,19 @@
 /**
  * Example usage:
  * Check Chrome servers, update all extensions to S3 and write out a new extensions manifest
- *   node tools/updateExtensions.js --chromium=55.0.2883.87 --upload
+ *   node bin/updateExtensions.js --chromium=55.0.2883.87 --upload --location=../vault-updater/data/
+ * Check Chrome servers, update a specific extension to S3 and write out a new extensions manifest
+ *   node bin/updateExtensions.js --chromium=55.0.2883.87 --upload --location=../vault-updater/data/ --id aomjjhallfgjeglblehebfpbcfeobpgk
  * Check Chrome servers, download all extensions into the out/ directory, but don't upload them
- *   node tools/updateExtensions.js --chromium=55.0.2883.87 --download
+ *   node bin/updateExtensions.js --chromium=55.0.2883.87 --download
  * Check Chrome servers to get a list of updates
- *   node tools/updateExtensions.js --chromium=55.0.2883.87
+ *   node bin/updateExtensions.js --chromium=55.0.2883.87
  * Check Brave servers to get a list of updates against what we have locally, also this is useful as a verification check to ensure 0 updates.
- *   node tools/updateExtensions.js --chromium=55.0.2883.87 --server=brave
+ *   node bin/updateExtensions.js --chromium=55.0.2883.87 --server=brave
  * Check Brave servers to get a list of updates against what we have locally with verbose logging
- *   node tools/updateExtensions.js --chromium=55.0.2883.87 --server=brave --v=2
- * Upload an individual chrome extension and update the manifest from local data (We do this for our own maintained extensions like PDFJS)
- *   node tools/updateExtensions.js --chromium=55.0.2883.87 --id jdbefljfgobbmcidnmpjamcbhnbphjnb --path ~/Downloads/pdfjs.crx --version 1.5.444
+ *   node bin/updateExtensions.js --chromium=55.0.2883.87 --server=brave --v=2
+ * Upload an individual extension that we maintain and update the manifest from local data (We do this for our own maintained extensions like PDFJS)
+ *   node bin/updateExtensions.js --chromium=55.0.2883.87 --id jdbefljfgobbmcidnmpjamcbhnbphjnb --path ~/Downloads/pdfjs.crx --version 1.5.444
  */
 
 const request = require('request')
@@ -214,6 +216,7 @@ if (args.id && args.path && args.version) {
 
     vlog(2, 'Response body:', body)
     const responseComponents = getResponseComponents(body)
+      .filter(([componentId]) => !args.id || componentId === args.id)
     if (responseComponents.length === 0) {
       console.error('No component information returned')
     }
