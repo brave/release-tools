@@ -9,20 +9,23 @@ var path = require('path')
 var _ = require('underscore')
 var util = require('util')
 var semver = require('semver')
+var async = require('async')
+var r = require('request')
 
 var channelData = require('../src/common').channelData
 var platformData = require('../src/common').platformData
 var nope = require('../src/common').nope
 
 var args = require('yargs')
-    .usage('Update browser-laptop release metadata files\n\nNote: Will not replace data files unless --overwrite flag set\n\nnode $0 --location=../../vault-updater/data --version=X.X.X --notes="release notes" --overwrite --channel=dev --release')
-    .demand(['version', 'notes', 'channel', 'location'])
+    .usage('Update browser-laptop release metadata files\n\nNote: Will not replace data files unless --overwrite flag set\n\nnode $0 --host=https://laptop-updates.brave.com --version=X.X.X --notes="release notes" --overwrite --channel=dev --release')
+    .demand(['version', 'notes', 'channel', 'host'])
     .describe('channel', 'channel identifier {' + _.keys(channelData) +'}')
     .describe('version', 'version identifier (semver format)')
     .describe('notes', 'release notes')
     .describe('overwrite', 'flag controlling writing changes to data files')
-    .describe('location', 'location of the data directory within a vault-updater repo')
+    .describe('host', 'laptop updates hostname')
     .default('overwrite', false)
+    .default('protocol', 'https')
     .argv
 
 // check the channel names
@@ -35,12 +38,6 @@ if (!semver.valid(args.version)) {
   nope("Invalid version format, must be a numeric triple separated by periods (example - 0.4.2)")
 }
 
-var dataPath = args.location
-// check that the location exists
-if (!fs.existsSync(path.join(dataPath, 'dev', 'osx.json'))) {
-  nope("Release data files do not exists within " + args.location)
-}
-
 // default preview to true (--release flag will override)
 var preview = !args.release
 
@@ -51,8 +48,6 @@ const LINUX64_TEMPLATE = BASE_URL + '/CHANNEL/VERSION/linux64/Brave.tar.bz2'
 
 var winx64_entry = {
   version: args.version,
-  name: 'Brave ' + args.version,
-  pub_date: (new Date()).toISOString(),
   notes: args.notes,
   preview: preview
 }
@@ -68,45 +63,42 @@ linux64_entry.url = LINUX64_TEMPLATE
 linux64_entry.url = linux64_entry.url.replace(/VERSION/g, args.version)
 linux64_entry.url = linux64_entry.url.replace(/CHANNEL/g, args.channel)
 
-var winia32_json = JSON.parse(fs.readFileSync(path.join(dataPath, args.channel, 'winia32.json')))
-var winx64_json = JSON.parse(fs.readFileSync(path.join(dataPath, args.channel, 'winx64.json')))
-var osx_json = JSON.parse(fs.readFileSync(path.join(dataPath, args.channel, 'osx.json')))
-var linux64_json = JSON.parse(fs.readFileSync(path.join(dataPath, args.channel, 'linux64.json')))
+var funcs = []
+var host = args.host
+if (args.port) host = host + ':' + args.port
 
-// Check for valid version
-_.each(osx_json, function (metadata) {
-  if (semver.compare(metadata.version, args.version) === 0) {
-    nope("Error: requested version " + args.version + " already exists")
+async.eachSeries(
+  [['winx64', winx64_entry],
+   ['winia32', winia32_entry],
+   ['osx', osx_entry],
+   ['linux64', linux64_entry]],
+  function (lst, cb) {
+    console.log(lst[0])
+    var options = {
+      method: 'POST',
+      url: args.protocol + '://' + host + '/api/1/releases/' + args.channel + '/' + lst[0],
+      json: true,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + process.env.AUTH_TOKEN
+      },
+      body: lst[1]
+    }
+    r(options, function (err, results, body) {
+      if (err || results.statusCode !== 200) {
+        console.log("An error occurred will attempting to add " + lst[0])
+        console.log(options)
+        console.log(body)
+        cb(body)
+      } else {
+        cb(null)
+      }
+    })
+  }, function (err) {
+    if (err) {
+      console.log("Error!")
+    } else {
+      console.log("Done") 
+    }
   }
-})
-if (osx_json.length > 0 && semver.compare(args.version, osx_json[0].version) === -1) {
-  nope("Error: requested version " + args.version + " is lower than the current version " + osx_json[0].version)
-}
-
-// Add the new entries
-winia32_json.unshift(winia32_entry)
-winx64_json.unshift(winx64_entry)
-osx_json.unshift(osx_entry)
-linux64_json.unshift(linux64_entry)
-
-var inspectContents = function (label, last) {
-  return '*** ' + label + ' *** \n' + util.inspect(last) + '\n'
-}
-
-console.log("Latest contents for channel " + args.channel)
-console.log(inspectContents('winia32', winia32_json[0]))
-console.log(inspectContents('winx64', winx64_json[0]))
-console.log(inspectContents('osx', osx_json[0]))
-console.log(inspectContents('linux64', linux64_json[0]))
-
-if (args.overwrite) {
-  console.log("Writing data files for channel " + args.channel)
-  fs.writeFileSync(path.join(dataPath, args.channel, 'winia32.json'), JSON.stringify(winia32_json, null, 2))
-  fs.writeFileSync(path.join(dataPath, args.channel, 'winx64.json'), JSON.stringify(winx64_json, null, 2))
-  fs.writeFileSync(path.join(dataPath, args.channel, 'osx.json'), JSON.stringify(osx_json, null, 2))
-  fs.writeFileSync(path.join(dataPath, args.channel, 'linux64.json'), JSON.stringify(linux64_json, null, 2))
-} else {
-  console.log("Warning: nothing written to disk. Use --overwrite flag to write changes.")
-}
-  
-console.log("Done")
+)
