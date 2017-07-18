@@ -66,22 +66,36 @@ var OS_IDENTIFIER = 2
 
 // Recipe tuples containing local relative paths to files, key locations on S3, and an os identifier
 var recipes = [
+  // Linux
   ['dist/Brave.tar.bz2', 'multi-channel/releases/CHANNEL/VERSION/linux64', 'linux'],
   ['dist/brave_VERSION_amd64.deb', 'multi-channel/releases/CHANNEL/VERSION/debian64', 'linux'],
   ['dist/brave-VERSION.x86_64.rpm', 'multi-channel/releases/CHANNEL/VERSION/fedora64', 'linux'],
 
+  // osx
   ['dist/Brave-VERSION.zip', 'multi-channel/releases/CHANNEL/VERSION/osx', 'osx'],
   ['dist/Brave-VERSION.dmg', 'multi-channel/releases/CHANNEL/VERSION/osx', 'osx'],
 
+  // Windows x64
   ['dist/x64/BraveSetup-x64.exe', 'multi-channel/releases/CHANNEL/VERSION/winx64', 'winx64'],
   ['dist/x64/BraveSetup-x64.exe', 'multi-channel/releases/CHANNEL/winx64', 'winx64'],
+  // TODO - the following two lines may be removed after all Windows browsers have moved
+  // to the specific version updater code.
   ['dist/x64/RELEASES', 'multi-channel/releases/CHANNEL/winx64', 'winx64'],
   ['dist/x64/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/winx64', 'winx64'],
+  // Support Windows update to a specific version
+  ['dist/x64/RELEASES', 'multi-channel/releases/CHANNEL/winx64/VERSION', 'winx64'],
+  ['dist/x64/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/winx64/VERSION', 'winx64'],
 
+  // Windows ia32
   ['dist/ia32/BraveSetup-ia32.exe', 'multi-channel/releases/CHANNEL/VERSION/winia32', 'winia32'],
   ['dist/ia32/BraveSetup-ia32.exe', 'multi-channel/releases/CHANNEL/winia32', 'winia32'],
+  // TODO - the following two lines may be removed after all Windows browsers have moved
+  // to the specific version updater code.
   ['dist/ia32/RELEASES', 'multi-channel/releases/CHANNEL/winia32', 'winia32'],
   ['dist/ia32/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/winia32', 'winia32']
+  // Support Windows update to a specific version
+  ['dist/ia32/RELEASES', 'multi-channel/releases/CHANNEL/winia32/VERSION', 'winia32'],
+  ['dist/ia32/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/winia32/VERSION', 'winia32']
 ]
 
 // For the dev channel we need to upload files to the legacy location. This will move them on to the dev
