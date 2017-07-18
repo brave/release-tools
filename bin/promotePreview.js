@@ -12,11 +12,12 @@ var channelData = require('../src/common').channelData
 var nope = require('../src/common').nope
 
 var args = require('yargs')
-    .usage('Promote preview version to release\n\nNote: Will not replace data files unless --overwrite flag set\n\nnode $0 --overwrite --channel=dev')
+    .usage('Promote preview version to release\n\nNote: Will not replace data files unless --overwrite flag set\n\nnode $0 --overwrite --channel=dev --notes="optional update to the notes"')
     .demand(['channel', 'location'])
     .describe('channel', 'channel identifier {' + _.keys(channelData) +'}')
     .describe('location', 'location to the data directory within a vault-updater repo')
     .describe('overwrite', 'flag controlling writing changes to data files')
+    .describe('notes', 'release notes')
     .default('overwrite', false)
     .argv
 
@@ -43,6 +44,7 @@ platforms.forEach((platformName) => {
     process.exit(1)
   } else {
     metadata.preview = false
+    if (args.notes) metadata.notes = args.notes
   }
   console.log(metadata)
   if (args.overwrite) {
