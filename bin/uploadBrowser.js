@@ -109,16 +109,14 @@ if (args.channel === 'dev') {
 }
 
 // filter the recipes based on the 'os' command line argument
-var osFilter = (recipe) => { return true }
-if (args.os) {
-  if (args.os === 'winx64') osFilter = function (recipe) { return recipe[OS_IDENTIFIER] === 'winx64' }
-  if (args.os === 'winia32') osFilter = function (recipe) { return recipe[OS_IDENTIFIER] === 'winia32' }
-  if (args.os === 'windows') osFilter = function (recipe) { return recipe[OS_IDENTIFIER] === 'winia32' || recipe[OS_IDENTIFIER] === 'winx64' }
-  if (args.os === 'osx') osFilter = function (recipe) { return recipe[OS_IDENTIFIER] === 'osx' }
-  if (args.os === 'linux') osFilter = function (recipe) { return recipe[OS_IDENTIFIER] === 'linux' }
-  // note: fall through (invalid) case handled in args validation
-}
-recipes = recipes.filter(osFilter)
+recipes = recipes.filter({
+  all: (recipe) => { return true },
+  winx64: (recipe) => { return recipe[OS_IDENTIFIER] === 'winx64' },
+  winia32: (recipe) => { return recipe[OS_IDENTIFIER] === 'winia32' },
+  windows: (recipe) => { return recipe[OS_IDENTIFIER] === 'winia32' || recipe[OS_IDENTIFIER] === 'winx64' },
+  osx: (recipe) => { return recipe[OS_IDENTIFIER] === 'osx' },
+  linux: (recipe) => { return recipe[OS_IDENTIFIER] === 'linux' }
+}[args.os || 'all'])
 
 // Replace VERSION in the recipes with the package version
 recipes = recipes.map((recipe) => {
