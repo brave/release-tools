@@ -92,7 +92,7 @@ var recipes = [
   // TODO - the following two lines may be removed after all Windows browsers have moved
   // to the specific version updater code.
   ['dist/ia32/RELEASES', 'multi-channel/releases/CHANNEL/winia32', 'winia32'],
-  ['dist/ia32/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/winia32', 'winia32']
+  ['dist/ia32/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/winia32', 'winia32'],
   // Support Windows update to a specific version
   ['dist/ia32/RELEASES', 'multi-channel/releases/CHANNEL/winia32/VERSION', 'winia32'],
   ['dist/ia32/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/winia32/VERSION', 'winia32']
