@@ -83,8 +83,8 @@ var recipes = [
   ['dist/x64/RELEASES', 'multi-channel/releases/CHANNEL/winx64', 'winx64'],
   ['dist/x64/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/winx64', 'winx64'],
   // Support Windows update to a specific version
-  ['dist/x64/RELEASES', 'multi-channel/releases/CHANNEL/winx64/VERSION', 'winx64'],
-  ['dist/x64/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/winx64/VERSION', 'winx64'],
+  ['dist/x64/RELEASES', 'multi-channel/releases/CHANNEL/VERSION/winx64', 'winx64'],
+  ['dist/x64/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/VERSION/winx64', 'winx64'],
 
   // Windows ia32
   ['dist/ia32/BraveSetup-ia32.exe', 'multi-channel/releases/CHANNEL/VERSION/winia32', 'winia32'],
@@ -94,8 +94,8 @@ var recipes = [
   ['dist/ia32/RELEASES', 'multi-channel/releases/CHANNEL/winia32', 'winia32'],
   ['dist/ia32/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/winia32', 'winia32'],
   // Support Windows update to a specific version
-  ['dist/ia32/RELEASES', 'multi-channel/releases/CHANNEL/winia32/VERSION', 'winia32'],
-  ['dist/ia32/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/winia32/VERSION', 'winia32']
+  ['dist/ia32/RELEASES', 'multi-channel/releases/CHANNEL/VERSION/winia32', 'winia32'],
+  ['dist/ia32/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/VERSION/winia32', 'winia32']
 ]
 
 // For the dev channel we need to upload files to the legacy location. This will move them on to the dev
