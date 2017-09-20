@@ -49,3 +49,7 @@ tmp/
 
 # extensions output directory
 out/
+
+# vim swap file
+*.swp
+

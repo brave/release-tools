@@ -16,5 +16,9 @@
     "underscore": "^1.8.3",
     "xmldoc": "^1.1.0",
     "yargs": "^7.1.0"
+  },
+  "devDependencies": {
+    "async-child-process": "^1.1.1",
+    "tap": "^10.7.2"
   }
 }
