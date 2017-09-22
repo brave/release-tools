@@ -46,8 +46,13 @@ if (args.os && ['windows', 'winx64', 'winia32', 'osx', 'linux'].indexOf(args.os)
   throw new Error(`Invalid os ${args.os}`)
 }
 
+function nope (msg) {
+  console.log(msg)
+  process.exit(1)
+}
+
 // Default bucket and region
-const S3_BUCKET = process.env.S3_BUCKET || 'brave-download'
+const S3_BUCKET = process.env.S3_DOWNLOAD_BUCKET || nope("S3_DOWNLOAD_BUCKET required")
 const S3_REGION = process.env.S3_REGION || 'us-east-1'
 
 // Check that the source directory for the binary assets exists
@@ -66,22 +71,36 @@ var OS_IDENTIFIER = 2
 
 // Recipe tuples containing local relative paths to files, key locations on S3, and an os identifier
 var recipes = [
+  // Linux
   ['dist/Brave.tar.bz2', 'multi-channel/releases/CHANNEL/VERSION/linux64', 'linux'],
   ['dist/brave_VERSION_amd64.deb', 'multi-channel/releases/CHANNEL/VERSION/debian64', 'linux'],
   ['dist/brave-VERSION.x86_64.rpm', 'multi-channel/releases/CHANNEL/VERSION/fedora64', 'linux'],
 
+  // osx
   ['dist/Brave-VERSION.zip', 'multi-channel/releases/CHANNEL/VERSION/osx', 'osx'],
   ['dist/Brave-VERSION.dmg', 'multi-channel/releases/CHANNEL/VERSION/osx', 'osx'],
 
+  // Windows x64
   ['dist/x64/BraveSetup-x64.exe', 'multi-channel/releases/CHANNEL/VERSION/winx64', 'winx64'],
   ['dist/x64/BraveSetup-x64.exe', 'multi-channel/releases/CHANNEL/winx64', 'winx64'],
+  // TODO - the following two lines may be removed after all Windows browsers have moved
+  // to the specific version updater code.
   ['dist/x64/RELEASES', 'multi-channel/releases/CHANNEL/winx64', 'winx64'],
   ['dist/x64/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/winx64', 'winx64'],
+  // Support Windows update to a specific version
+  ['dist/x64/RELEASES', 'multi-channel/releases/CHANNEL/VERSION/winx64', 'winx64'],
+  ['dist/x64/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/VERSION/winx64', 'winx64'],
 
+  // Windows ia32
   ['dist/ia32/BraveSetup-ia32.exe', 'multi-channel/releases/CHANNEL/VERSION/winia32', 'winia32'],
   ['dist/ia32/BraveSetup-ia32.exe', 'multi-channel/releases/CHANNEL/winia32', 'winia32'],
+  // TODO - the following two lines may be removed after all Windows browsers have moved
+  // to the specific version updater code.
   ['dist/ia32/RELEASES', 'multi-channel/releases/CHANNEL/winia32', 'winia32'],
-  ['dist/ia32/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/winia32', 'winia32']
+  ['dist/ia32/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/winia32', 'winia32'],
+  // Support Windows update to a specific version
+  ['dist/ia32/RELEASES', 'multi-channel/releases/CHANNEL/VERSION/winia32', 'winia32'],
+  ['dist/ia32/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/VERSION/winia32', 'winia32']
 ]
 
 // For the dev channel we need to upload files to the legacy location. This will move them on to the dev
@@ -95,16 +114,14 @@ if (args.channel === 'dev') {
 }
 
 // filter the recipes based on the 'os' command line argument
-var osFilter = (recipe) => { return true }
-if (args.os) {
-  if (args.os === 'winx64') osFilter = function (recipe) { return recipe[OS_IDENTIFIER] === 'winx64' }
-  if (args.os === 'winia32') osFilter = function (recipe) { return recipe[OS_IDENTIFIER] === 'winia32' }
-  if (args.os === 'windows') osFilter = function (recipe) { return recipe[OS_IDENTIFIER] === 'winia32' || recipe[OS_IDENTIFIER] === 'winx64' }
-  if (args.os === 'osx') osFilter = function (recipe) { return recipe[OS_IDENTIFIER] === 'osx' }
-  if (args.os === 'linux') osFilter = function (recipe) { return recipe[OS_IDENTIFIER] === 'linux' }
-  // note: fall through (invalid) case handled in args validation
-}
-recipes = recipes.filter(osFilter)
+recipes = recipes.filter({
+  all: (recipe) => { return true },
+  winx64: (recipe) => { return recipe[OS_IDENTIFIER] === 'winx64' },
+  winia32: (recipe) => { return recipe[OS_IDENTIFIER] === 'winia32' },
+  windows: (recipe) => { return recipe[OS_IDENTIFIER] === 'winia32' || recipe[OS_IDENTIFIER] === 'winx64' },
+  osx: (recipe) => { return recipe[OS_IDENTIFIER] === 'osx' },
+  linux: (recipe) => { return recipe[OS_IDENTIFIER] === 'linux' }
+}[args.os || 'all'])
 
 // Replace VERSION in the recipes with the package version
 recipes = recipes.map((recipe) => {
