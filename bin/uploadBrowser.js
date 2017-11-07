@@ -30,7 +30,7 @@ var channelData = require('../src/common').channelData
 var args = require('yargs')
     .usage('node bin/uploadBrowser.js --source=/full/directory/to/browser-laptop --send')
     .demand(['channel', 'source'])
-    .describe('channel', 'channel identifier { dev, beta, release }')
+    .describe('channel', 'channel identifier { dev, beta, developer, nightly }')
     .describe('source', 'directory containing release files in dist/ folder')
     .default('os', null)
     .describe('os', 'operating system identifier { osx, linux, windows, winx64, winia32 }')
@@ -73,34 +73,34 @@ var OS_IDENTIFIER = 2
 var recipes = [
   // Linux
   ['dist/Brave.tar.bz2', 'multi-channel/releases/CHANNEL/VERSION/linux64', 'linux'],
-  ['dist/brave_VERSION_amd64.deb', 'multi-channel/releases/CHANNEL/VERSION/debian64', 'linux'],
-  ['dist/brave-VERSION.x86_64.rpm', 'multi-channel/releases/CHANNEL/VERSION/fedora64', 'linux'],
+  ['dist/brave{{channelName}}_VERSION_amd64.deb', 'multi-channel/releases/CHANNEL/VERSION/debian64', 'linux'],
+  ['dist/brave{{channelName}}-VERSION.x86_64.rpm', 'multi-channel/releases/CHANNEL/VERSION/fedora64', 'linux'],
 
   // osx
-  ['dist/Brave-VERSION.zip', 'multi-channel/releases/CHANNEL/VERSION/osx', 'osx'],
-  ['dist/Brave-VERSION.dmg', 'multi-channel/releases/CHANNEL/VERSION/osx', 'osx'],
+  ['dist/Brave{{channelName}}-VERSION.zip', 'multi-channel/releases/CHANNEL/VERSION/osx', 'osx'],
+  ['dist/Brave{{channelName}}-VERSION.dmg', 'multi-channel/releases/CHANNEL/VERSION/osx', 'osx'],
 
   // Windows x64
-  ['dist/x64/BraveSetup-x64.exe', 'multi-channel/releases/CHANNEL/VERSION/winx64', 'winx64'],
-  ['dist/x64/BraveSetup-x64.exe', 'multi-channel/releases/CHANNEL/winx64', 'winx64'],
+  ['dist/x64/Brave{{channelName}}Setup-x64.exe', 'multi-channel/releases/CHANNEL/VERSION/winx64', 'winx64'],
+  ['dist/x64/Brave{{channelName}}Setup-x64.exe', 'multi-channel/releases/CHANNEL/winx64', 'winx64'],
   // TODO - the following two lines may be removed after all Windows browsers have moved
   // to the specific version updater code.
   ['dist/x64/RELEASES', 'multi-channel/releases/CHANNEL/winx64', 'winx64'],
-  ['dist/x64/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/winx64', 'winx64'],
+  ['dist/x64/brave{{channelName}}-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/winx64', 'winx64'],
   // Support Windows update to a specific version
   ['dist/x64/RELEASES', 'multi-channel/releases/CHANNEL/VERSION/winx64', 'winx64'],
-  ['dist/x64/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/VERSION/winx64', 'winx64'],
+  ['dist/x64/brave{{channelName}}-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/VERSION/winx64', 'winx64'],
 
   // Windows ia32
-  ['dist/ia32/BraveSetup-ia32.exe', 'multi-channel/releases/CHANNEL/VERSION/winia32', 'winia32'],
-  ['dist/ia32/BraveSetup-ia32.exe', 'multi-channel/releases/CHANNEL/winia32', 'winia32'],
+  ['dist/ia32/Brave{{channelName}}Setup-ia32.exe', 'multi-channel/releases/CHANNEL/VERSION/winia32', 'winia32'],
+  ['dist/ia32/Brave{{channelName}}Setup-ia32.exe', 'multi-channel/releases/CHANNEL/winia32', 'winia32'],
   // TODO - the following two lines may be removed after all Windows browsers have moved
   // to the specific version updater code.
   ['dist/ia32/RELEASES', 'multi-channel/releases/CHANNEL/winia32', 'winia32'],
-  ['dist/ia32/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/winia32', 'winia32'],
+  ['dist/ia32/brave{{channelName}}-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/winia32', 'winia32'],
   // Support Windows update to a specific version
   ['dist/ia32/RELEASES', 'multi-channel/releases/CHANNEL/VERSION/winia32', 'winia32'],
-  ['dist/ia32/brave-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/VERSION/winia32', 'winia32']
+  ['dist/ia32/brave{{channelName}}-VERSION-full.nupkg', 'multi-channel/releases/CHANNEL/VERSION/winia32', 'winia32']
 ]
 
 // For the dev channel we need to upload files to the legacy location. This will move them on to the dev
@@ -113,6 +113,26 @@ if (args.channel === 'dev') {
   ])
 }
 
+const capitalizeFirstLetter = (word) => {
+  const firstLetter = word.charAt(0).toUpperCase()
+  return firstLetter + word.slice(1)
+}
+
+const getChannelName = () => {
+  if (args.channel === 'dev') {
+    return ''
+  }
+  switch (args.os) {
+    case 'windows':
+    case 'winx64':
+    case 'winia32':
+      return capitalizeFirstLetter(args.channel) + '-'
+    case 'osx':
+      return '-' + capitalizeFirstLetter(args.channel)
+  }
+  return '-' + args.channel
+}
+
 // filter the recipes based on the 'os' command line argument
 recipes = recipes.filter({
   all: (recipe) => { return true },
@@ -123,10 +143,11 @@ recipes = recipes.filter({
   linux: (recipe) => { return recipe[OS_IDENTIFIER] === 'linux' }
 }[args.os || 'all'])
 
-// Replace VERSION in the recipes with the package version
+// Replace tokens in the recipes (ex: `VERSION`, `{{channelName}}`)
 recipes = recipes.map((recipe) => {
   var dist = recipe[LOCAL_LOCATION].replace('VERSION', version)
   dist = dist.replace('CHANNEL', args.channel)
+  dist = dist.replace('{{channelName}}', getChannelName())
 
   var multi = recipe[REMOTE_LOCATION].replace('VERSION', version)
   multi = multi.replace('CHANNEL', args.channel)
