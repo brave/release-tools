@@ -34,10 +34,31 @@ var makeVlog = function (argsv) {
   return (v, ...vargs) => argsv >= v && console.log(...vargs)
 }
 
+const capitalizeFirstLetter = (word) => {
+  const firstLetter = word.charAt(0).toUpperCase()
+  return firstLetter + word.slice(1)
+}
+
+const getChannelName = (os, channel) => {
+  if (channel === 'dev') {
+    return ''
+  }
+  switch (os) {
+    case 'windows':
+    case 'winx64':
+    case 'winia32':
+      return capitalizeFirstLetter(channel) + '-'
+    case 'osx':
+      return '-' + capitalizeFirstLetter(channel)
+  }
+  return '-' + channel
+}
+
 module.exports = {
-  channelData: channelData,
-  platformData: platformData,
-  nope: nope,
-  makeVlog: makeVlog
+  channelData,
+  platformData,
+  nope,
+  makeVlog,
+  getChannelName
 }
 

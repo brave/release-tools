@@ -25,7 +25,7 @@ var async = require('async')
 
 var AWS = require('aws-sdk')
 
-var channelData = require('../src/common').channelData
+const {channelData, getChannelName} = require('../src/common')
 
 var args = require('yargs')
     .usage('node bin/uploadBrowser.js --source=/full/directory/to/browser-laptop --send')
@@ -72,7 +72,7 @@ var OS_IDENTIFIER = 2
 // Recipe tuples containing local relative paths to files, key locations on S3, and an os identifier
 var recipes = [
   // Linux
-  ['dist/Brave.tar.bz2', 'multi-channel/releases/CHANNEL/VERSION/linux64', 'linux'],
+  ['dist/Brave{{channelName}}.tar.bz2', 'multi-channel/releases/CHANNEL/VERSION/linux64', 'linux'],
   ['dist/brave{{channelName}}_VERSION_amd64.deb', 'multi-channel/releases/CHANNEL/VERSION/debian64', 'linux'],
   ['dist/brave{{channelName}}-VERSION.x86_64.rpm', 'multi-channel/releases/CHANNEL/VERSION/fedora64', 'linux'],
 
@@ -113,26 +113,6 @@ if (args.channel === 'dev') {
   ])
 }
 
-const capitalizeFirstLetter = (word) => {
-  const firstLetter = word.charAt(0).toUpperCase()
-  return firstLetter + word.slice(1)
-}
-
-const getChannelName = () => {
-  if (args.channel === 'dev') {
-    return ''
-  }
-  switch (args.os) {
-    case 'windows':
-    case 'winx64':
-    case 'winia32':
-      return capitalizeFirstLetter(args.channel) + '-'
-    case 'osx':
-      return '-' + capitalizeFirstLetter(args.channel)
-  }
-  return '-' + args.channel
-}
-
 // filter the recipes based on the 'os' command line argument
 recipes = recipes.filter({
   all: (recipe) => { return true },
@@ -147,7 +127,7 @@ recipes = recipes.filter({
 recipes = recipes.map((recipe) => {
   var dist = recipe[LOCAL_LOCATION].replace('VERSION', version)
   dist = dist.replace('CHANNEL', args.channel)
-  dist = dist.replace('{{channelName}}', getChannelName())
+  dist = dist.replace('{{channelName}}', getChannelName(args.os, args.channel))
 
   var multi = recipe[REMOTE_LOCATION].replace('VERSION', version)
   multi = multi.replace('CHANNEL', args.channel)

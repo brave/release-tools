@@ -10,8 +10,7 @@ var _ = require('underscore')
 var util = require('util')
 var semver = require('semver')
 
-var channelData = require('../src/common').channelData
-var platformData = require('../src/common').platformData
+const {channelData, platformData, getChannelName} = require('../src/common')
 var nope = require('../src/common').nope
 
 var args = require('yargs')
@@ -46,8 +45,8 @@ var preview = !args.release
 
 const BASE_URL = process.env.BASE_URL || 'https://brave-download.global.ssl.fastly.net/multi-channel/releases'
 
-const OSX_TEMPLATE = BASE_URL + '/CHANNEL/VERSION/osx/Brave-VERSION.zip'
-const LINUX64_TEMPLATE = BASE_URL + '/CHANNEL/VERSION/linux64/Brave.tar.bz2'
+const OSX_TEMPLATE = BASE_URL + '/CHANNEL/VERSION/osx/Brave{{channelName}}-VERSION.zip'
+const LINUX64_TEMPLATE = BASE_URL + '/CHANNEL/VERSION/linux64/Brave{{channelName}}.tar.bz2'
 
 var winx64_entry = {
   version: args.version,
@@ -60,13 +59,15 @@ var winia32_entry = _.clone(winx64_entry)
 
 var osx_entry = _.clone(winx64_entry)
 osx_entry.url = OSX_TEMPLATE
-osx_entry.url = osx_entry.url.replace(/VERSION/g, args.version)
-osx_entry.url = osx_entry.url.replace(/CHANNEL/g, args.channel)
+                  .replace(/VERSION/g, args.version)
+                  .replace(/CHANNEL/g, args.channel)
+                  .replace('{{channelName}}', getChannelName('osx', args.channel))
 
 var linux64_entry = _.clone(winx64_entry)
 linux64_entry.url = LINUX64_TEMPLATE
-linux64_entry.url = linux64_entry.url.replace(/VERSION/g, args.version)
-linux64_entry.url = linux64_entry.url.replace(/CHANNEL/g, args.channel)
+                      .replace(/VERSION/g, args.version)
+                      .replace(/CHANNEL/g, args.channel)
+                      .replace('{{channelName}}', getChannelName('linux', args.channel))
 
 var winia32_json = JSON.parse(fs.readFileSync(path.join(dataPath, args.channel, 'winia32.json')))
 var winx64_json = JSON.parse(fs.readFileSync(path.join(dataPath, args.channel, 'winx64.json')))
@@ -108,5 +109,5 @@ if (args.overwrite) {
 } else {
   console.log("Warning: nothing written to disk. Use --overwrite flag to write changes.")
 }
-  
+
 console.log("Done")
