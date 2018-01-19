@@ -45,8 +45,8 @@ var preview = !args.release
 
 const BASE_URL = process.env.BASE_URL || 'https://brave-download.global.ssl.fastly.net/multi-channel/releases'
 
-const OSX_TEMPLATE = BASE_URL + '/CHANNEL/VERSION/osx/Brave{{channelName}}-VERSION.zip'
-const LINUX64_TEMPLATE = BASE_URL + '/CHANNEL/VERSION/linux64/Brave{{channelName}}.tar.bz2'
+const OSX_TEMPLATE = BASE_URL + '/{{channel}}/{{version}}/osx/Brave{{channelName}}-{{version}}.zip'
+const LINUX64_TEMPLATE = BASE_URL + '/{{channel}}/{{version}}/linux64/Brave{{channelName}}.tar.bz2'
 
 var winx64_entry = {
   version: args.version,
@@ -59,14 +59,14 @@ var winia32_entry = _.clone(winx64_entry)
 
 var osx_entry = _.clone(winx64_entry)
 osx_entry.url = OSX_TEMPLATE
-                  .replace(/VERSION/g, args.version)
-                  .replace(/CHANNEL/g, args.channel)
+                  .replace(/{{version}}/g, args.version)
+                  .replace(/{{channel}}/g, args.channel)
                   .replace('{{channelName}}', getChannelName('osx', args.channel))
 
 var linux64_entry = _.clone(winx64_entry)
 linux64_entry.url = LINUX64_TEMPLATE
-                      .replace(/VERSION/g, args.version)
-                      .replace(/CHANNEL/g, args.channel)
+                      .replace(/{{version}}/g, args.version)
+                      .replace(/{{channel}}/g, args.channel)
                       .replace('{{channelName}}', getChannelName('linux', args.channel))
 
 var winia32_json = JSON.parse(fs.readFileSync(path.join(dataPath, args.channel, 'winia32.json')))
