@@ -25,7 +25,7 @@ var async = require('async')
 
 var AWS = require('aws-sdk')
 
-const {channelData, getChannelName} = require('../src/common')
+const {channelData, getChannelName, getNugetPackagePrefix} = require('../src/common')
 
 var args = require('yargs')
     .usage('node bin/uploadBrowser.js --source=/full/directory/to/browser-laptop --send')
@@ -86,10 +86,10 @@ var recipes = [
   // TODO - the following two lines may be removed after all Windows browsers have moved
   // to the specific version updater code.
   ['dist/x64/RELEASES', 'multi-channel/releases/{{channel}}/winx64', 'winx64'],
-  ['dist/x64/brave{{channelName}}-{{version}}-full.nupkg', 'multi-channel/releases/{{channel}}/winx64', 'winx64'],
+  ['dist/x64/{{nugetPackagePrefix}}-{{version}}-full.nupkg', 'multi-channel/releases/{{channel}}/winx64', 'winx64'],
   // Support Windows update to a specific version
   ['dist/x64/RELEASES', 'multi-channel/releases/{{channel}}/{{version}}/winx64', 'winx64'],
-  ['dist/x64/brave{{channelName}}-{{version}}-full.nupkg', 'multi-channel/releases/{{channel}}/{{version}}/winx64', 'winx64'],
+  ['dist/x64/{{nugetPackagePrefix}}-{{version}}-full.nupkg', 'multi-channel/releases/{{channel}}/{{version}}/winx64', 'winx64'],
 
   // Windows ia32
   ['dist/ia32/Brave{{channelName}}Setup-ia32.exe', 'multi-channel/releases/{{channel}}/{{version}}/winia32', 'winia32'],
@@ -97,10 +97,10 @@ var recipes = [
   // TODO - the following two lines may be removed after all Windows browsers have moved
   // to the specific version updater code.
   ['dist/ia32/RELEASES', 'multi-channel/releases/{{channel}}/winia32', 'winia32'],
-  ['dist/ia32/brave{{channelName}}-{{version}}-full.nupkg', 'multi-channel/releases/{{channel}}/winia32', 'winia32'],
+  ['dist/ia32/{{nugetPackagePrefix}}-{{version}}-full.nupkg', 'multi-channel/releases/{{channel}}/winia32', 'winia32'],
   // Support Windows update to a specific version
   ['dist/ia32/RELEASES', 'multi-channel/releases/{{channel}}/{{version}}/winia32', 'winia32'],
-  ['dist/ia32/brave{{channelName}}-{{version}}-full.nupkg', 'multi-channel/releases/{{channel}}/{{version}}/winia32', 'winia32']
+  ['dist/ia32/{{nugetPackagePrefix}}-{{version}}-full.nupkg', 'multi-channel/releases/{{channel}}/{{version}}/winia32', 'winia32']
 ]
 
 // For the dev channel we need to upload files to the legacy location. This will move them on to the dev
@@ -128,6 +128,7 @@ recipes = recipes.map((recipe) => {
   var dist = recipe[LOCAL_LOCATION].replace('{{version}}', version)
   dist = dist.replace('{{channel}}', args.channel)
   dist = dist.replace('{{channelName}}', getChannelName(args.os, args.channel))
+  dist = dist.replace('{{nugetPackagePrefix}}', getNugetPackagePrefix(args.channel))
 
   var multi = recipe[REMOTE_LOCATION].replace('{{version}}', version)
   multi = multi.replace('{{channel}}', args.channel)

@@ -54,11 +54,19 @@ const getChannelName = (os, channel) => {
   return '-' + channel
 }
 
+const getNugetPackagePrefix = (channel) => {
+  if (channel === 'dev') {
+    return 'brave'
+  }
+  return 'Brave' + capitalizeFirstLetter(channel)
+}
+
 module.exports = {
   channelData,
   platformData,
   nope,
   makeVlog,
-  getChannelName
+  getChannelName,
+  getNugetPackagePrefix
 }
 
