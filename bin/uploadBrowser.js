@@ -79,6 +79,7 @@ var recipes = [
   // osx
   ['dist/Brave{{channelName}}-{{version}}.zip', 'multi-channel/releases/{{channel}}/{{version}}/osx', 'osx'],
   ['dist/Brave{{channelName}}-{{version}}.dmg', 'multi-channel/releases/{{channel}}/{{version}}/osx', 'osx'],
+  ['dist/Brave{{channelName}}-{{version}}.pkg', 'multi-channel/releases/{{channel}}/{{version}}/osx', 'osx'],
 
   // Windows x64
   ['dist/x64/Brave{{channelName}}Setup-x64.exe', 'multi-channel/releases/{{channel}}/{{version}}/winx64', 'winx64'],
