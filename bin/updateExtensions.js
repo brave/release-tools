@@ -82,6 +82,9 @@ const getResponseComponents = (responseXML) => {
     return undefined
   }
   const extensions = doc.childrenNamed('app')
+        .filter((app) => {
+          return !!app.descendantWithPath('updatecheck.manifest')
+        })
         .map((app) => {
           return [app.attr.appid, app.descendantWithPath('updatecheck.manifest').attr.version, app.descendantWithPath('updatecheck.manifest.packages.package').attr.hash_sha256]
         })
