@@ -77,8 +77,8 @@ const readComponentsForVersionUpgradesOnly = () => [...readExtensions(),
  */
 const getResponseComponents = (responseXML) => {
   const doc = new xmldoc.XmlDocument(responseXML)
-  if (doc.attr.protocol !== '3.0') {
-    console.error('Only protocol v3 is supproted')
+  if (doc.attr.protocol !== '3.0' && doc.attr.protocol !== '3.1') {
+    console.error('Only protocol versions 3.0 and 3.1 are supproted')
     return undefined
   }
   const extensions = doc.childrenNamed('app')
