@@ -234,7 +234,7 @@ if (args.id && args.path && args.version) {
       // Filter out components with the same Brave versions as Google version
       .filter((component) => component[1] !== component[4])
       // And reduce to a string that we print out
-      .reduce((result, [componentId, chromeVersion, chromeSHA256, componentId2, braveVersion, braveSHA256, componentName]) => result + `Component: ${componentName} (${componentId})\nChrome store: ${chromeVersion}\nBrave store: ${braveVersion}\nSHA 256: ${chromeSHA256}\n\n`, ''))
+      .reduce((result, [componentId, chromeVersion, chromeSHA256, componentId2, braveVersion, braveSHA256, componentName]) => result + `Component: ${componentName} (${componentId})\nComponent updater version: ${chromeVersion}\nLocal requested version: ${braveVersion}\nSHA 256: ${chromeSHA256}\n\n`, ''))
 
     // Widevine components should not be attempted to be downloaded or uploaded, it is just for getting the version.
     // If you try it will just throw an error.
