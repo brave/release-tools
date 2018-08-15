@@ -23,7 +23,7 @@
  */
 
 const request = require('request')
-const s3 = require('s3')
+const s3 = require('s3-node-client')
 const fs = require('fs')
 const crypto = require('crypto')
 const path = require('path')
