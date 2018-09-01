@@ -77,14 +77,13 @@ const readComponentsForVersionUpgradesOnly = () => [...readExtensions(),
  */
 const getResponseComponents = (responseXML) => {
   const doc = new xmldoc.XmlDocument(responseXML)
-  if (doc.attr.protocol !== '3.0') {
-    console.error('Only protocol v3 is supproted')
+  if (doc.attr.protocol !== '3.0' && doc.attr.protocol !== '3.1') {
+    console.error('Only protocol versions 3.0 and 3.1 are supproted')
     return undefined
   }
   const extensions = doc.childrenNamed('app')
-        .filter((app) => {
-          return !!app.descendantWithPath('updatecheck.manifest')
-        })
+        // Only consider app elements with packages
+        .filter((app) => app.descendantWithPath('updatecheck.manifest.packages.package'))
         .map((app) => {
           return [app.attr.appid, app.descendantWithPath('updatecheck.manifest').attr.version, app.descendantWithPath('updatecheck.manifest.packages.package').attr.hash_sha256]
         })
@@ -235,7 +234,7 @@ if (args.id && args.path && args.version) {
       // Filter out components with the same Brave versions as Google version
       .filter((component) => component[1] !== component[4])
       // And reduce to a string that we print out
-      .reduce((result, [componentId, chromeVersion, chromeSHA256, componentId2, braveVersion, braveSHA256, componentName]) => result + `Component: ${componentName} (${componentId})\nChrome store: ${chromeVersion}\nBrave store: ${braveVersion}\nSHA 256: ${chromeSHA256}\n\n`, ''))
+      .reduce((result, [componentId, chromeVersion, chromeSHA256, componentId2, braveVersion, braveSHA256, componentName]) => result + `Component: ${componentName} (${componentId})\nComponent updater version: ${chromeVersion}\nLocal requested version: ${braveVersion}\nSHA 256: ${chromeSHA256}\n\n`, ''))
 
     // Widevine components should not be attempted to be downloaded or uploaded, it is just for getting the version.
     // If you try it will just throw an error.
