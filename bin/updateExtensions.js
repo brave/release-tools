@@ -126,7 +126,9 @@ const client = s3.createClient({
   multipartUploadThreshold: 20971520,
   multipartUploadSize: 15728640,
   // See: http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html#constructor-property
-  s3Options: {}
+  s3Options: {
+    signatureVersion: 'v4'
+  }
 })
 
 const braveComponents = readComponentsForVersionUpgradesOnly()
